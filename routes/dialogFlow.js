@@ -1,10 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-router.post('/session', function (req, res, next) {
+router.post('/', function (req, res, next) {
     //console.log(req.body.queryResult.parameters.name);
-    const user = req.body.queryResult.parameters.name//req.body.queryResult && req.body.queryResult.parameters && req.body.queryResult.parameters.name ? req.body.result.parameters.name : ''
-    res.json({fulfillmentText: 'hola que tal el dia ' + user + '?', source: 'session'})
+    const action = req.body.queryResult.action;
+    if(action){
+        switch (action) {
+            case 'AUTH':
+                const user = req.body.queryResult.parameters.name;
+                res.json({fulfillmentText: 'hola que tal el dia ' + user + '?', source: 'session'});
+                break;
+            default:
+                res.json({fulfillmentText: 'creo que no entendi eso', source: 'session'});
+        }
+    }
+
 })
 /*router.post('/getmovie', (req, res) => {
     const movieToSearch = req.body.queryResult && req.body.queryResult.parameters && req.body.queryResult.parameters.movie ? req.body.result.parameters.movie : ''
