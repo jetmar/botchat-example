@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
-
+const controller = require('../controllers/dialogFlowController')
 router.post('/', function (req, res, next) {
     //console.log(req.body.queryResult.parameters.name);
     const action = req.body.queryResult.action;
     if(action){
-        switch (action) {
-            case 'AUTH':
-                const user = req.body.queryResult.parameters.name;
-                res.json({fulfillmentText: 'hola que tal el dia ' + user + '?', source: 'session'});
-                break;
-            default:
-                res.json({fulfillmentText: 'creo que no entendi eso', source: 'session'});
+        try {
+            const  result = controller[action](req.body);
+            res.json(result)
+        }
+        catch (e) {
+            console.log(e);
+            res.json({error:e});
         }
     }
 
