@@ -1,0 +1,26 @@
+const express = require('express');
+const router = express.Router();
+
+router.post('/session', function (req, res, next) {
+    const user = req.body.queryResult && req.body.queryResult.parameters && req.body.queryResult.parameters.name ? req.body.result.parameters.name : ''
+    res.json({fulfillmentText: 'hola que tal el dia ' + user + '?', source: 'session'})
+})
+/*router.post('/getmovie', (req, res) => {
+    const movieToSearch = req.body.queryResult && req.body.queryResult.parameters && req.body.queryResult.parameters.movie ? req.body.result.parameters.movie : ''
+    const reqUrl = encodeURI(`http://www.omdbapi.com/?t=${movieToSearch}&apikey=${process.env.API_KEY}`)
+    http.get(reqUrl, responseFromAPI => {
+        let completeResponse = ''
+        responseFromAPI.on('data', chunk => {
+            completeResponse += chunk
+        })
+        responseFromAPI.on('end', () => {
+            const movie = JSON.parse(completeResponse)
+            let dataToSend = movieToSearch
+            dataToSend = `${movie.Title} was released in the year ${movie.Year}. It is directed by ${movie.Director} and stars ${movie.Actors}.\n Here some glimpse of the plot: ${movie.Plot}. }`
+            return res.json({fulfillmentText: dataToSend, source: 'getmovie'})
+        })
+    }, error => {
+        return res.json({fulfillmentText: 'Could not get results at this time', source: 'getmovie'})
+    })
+})*/
+module.exports = router;
