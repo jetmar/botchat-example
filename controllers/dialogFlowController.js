@@ -23,13 +23,7 @@ const actions = {
         const db = getConnection();
         const user = db.get('users').find({name: username}).value()
         return {
-            fulfillmentText: {
-                text: {
-                    text: [
-                        `${user.name}! tu saldo actual es de ${user.balance}`
-                    ]
-                }
-            }, source: 'session'
+            fulfillmentText:`${user.name}! tu saldo actual es de ${user.balance}`, source: 'session'
         }
     }
 }
