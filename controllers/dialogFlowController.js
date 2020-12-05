@@ -40,7 +40,7 @@ const actions = {
     },
     INDICATORS: async ({queryResult}) => {
         try {
-            const data = ['valor en CLP']
+            const data = [];
             const {parameters} = queryResult;
             if (parameters && parameters.indicator) {
                 const resp = await axios.get(`https://mindicador.cl/api/${parameters.indicator}`);
@@ -58,10 +58,20 @@ const actions = {
             return {
                 fulfillmentMessages: [
                     {
-                        text: {
-                            text: data
+                        payload:{
+                            richContent: [
+                                [
+                                    {
+                                        type: "Indicadores economicos",
+                                        title: "Valoración en CLP",
+                                        text: data
+                                    }
+                                ]
+                            ]
+
                         }
-                    }], source: 'indicators'
+                    }
+                ], source: 'indicators'
             };
 
         } catch (e) {

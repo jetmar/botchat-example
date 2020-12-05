@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "id": "1935862d-1e86-4d11-a0ab-13f3542e1fc7",
+      "name": "Jerson",
+      "phone": " +56972636554",
+      "account_number": "6125272641",
+      "balance": 5000000
+    }
+  ],
+  "transfer": []
+}
