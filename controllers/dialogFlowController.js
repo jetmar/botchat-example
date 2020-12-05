@@ -1,6 +1,7 @@
 const {getConnection} = require('../store/db')
-const {generateCardNumber, formatter, pdfGenerator} = require('../utils/')
+const {generateCardNumber, formatter, pdfGenerator,getParametersFromContext} = require('../utils/')
 const transferTemplate = require('../templates/transfer')
+const responseBuilder = require('../utils/responseBuilder')
 const {v4} = require('uuid')
 const axios = require('axios');
 const actions = {
@@ -54,42 +55,26 @@ const actions = {
         }
     },
     BALANCE: ({queryResult}) => {
-        const username = queryResult.outputContexts[0].parameters.name;
-
+        const params = getParametersFromContext(queryResult,"awating_name");
+        if(!params || !params.name){
+            return {
+                fulfillmentText: `No es posible procesar su consulta en este momento `, source: 'session'
+            }
+        }
+        const username =params.name;
         const db = getConnection();
         const user = db.get('users').find({name: username}).value()
-        return {
-            fulfillmentMessages: [
-                {
-                    text: {
-                        text: [
-                            `${user.name}! tu saldo actual es de ${formatter.format(user.balance)}`
-                        ]
-                    }
-                },
-                {
-                    payload: {
-                        richContent: [
-                            [
-                                {
-                                    type: "chips",
-                                    options: [
-                                        {
-                                            text: "Indicadores económicos"
-                                        },
-                                        {
-                                            text: "Realizar trasferencia "
-                                        }
-                                    ]
-                                }
-                            ]
-                        ]
-
-                    }
-                }
-            ], source: 'session'
-        }
-
+        const builder = new responseBuilder('session');
+        builder.addText(`${user.name}! tu saldo actual es de ${formatter.format(user.balance)}`);
+        builder.addChips([
+            {
+                text: "Indicadores económicos"
+            },
+            {
+                text: "Realizar trasferencia "
+            }
+        ]);
+        return  builder.getResponse()
     },
     INDICATORS: async ({queryResult}) => {
         try {
@@ -108,62 +93,33 @@ const actions = {
                     }
                 }
             }
-            const content = [
-                {
-                    type: "description",
-                    title: "Indicadores económicos (valoración en CLP)",
-                    text: data
-                }
-            ];
-            if (
-                queryResult.outputContexts
-                &&
-                queryResult.outputContexts[0].parameters
-                &&
-                queryResult.outputContexts[0].parameters.name
-            ) {
-                content.push({
-                    type: "chips",
-                    options: [
-                        {
-                            text: "Cual es mi saldo?"
-                        },
-                        {
-                            text: "Realizar trasferencia "
-                        }
-                    ]
-                });
-            } else
-                content.push({
-                    type: "chips",
-                    options: [
-                        {
-                            text: "Quiero iniciar sesion"
-                        },
-                        {
-                            text: "Indicadores económicos"
-                        }
-                    ]
-                })
-            return {
-                fulfillmentMessages: [
+            const builder = new responseBuilder("indicators");
+            builder.addRawRichContent({
+                type: "description",
+                title: "Indicadores económicos (valoración en CLP)",
+                text: data
+            })
+            builder.addText("");
+            const params = getParametersFromContext(queryResult,"awating_name");
+            if (params && params.name) {
+                builder.addChips([
                     {
-                        text: {
-                            text: [
-                                ""
-                            ]
-                        }
+                        text: "Cual es mi saldo?"
                     },
                     {
-                        payload: {
-                            richContent: [
-                                content
-                            ]
-
-                        }
+                        text: "Realizar trasferencia "
                     }
-                ], source: 'indicators'
-            };
+                ])
+            } else
+                builder.addChips( [
+                    {
+                        text: "Quiero iniciar sesion"
+                    },
+                    {
+                        text: "Indicadores económicos"
+                    }
+                ])
+            return builder.getResponse();
 
         } catch (e) {
             return {
@@ -173,47 +129,28 @@ const actions = {
     },
     TRANSFER: ({queryResult}, url) => {
         const {parameters} = queryResult;
-        const username = queryResult.outputContexts[0].parameters.name;
-        if (username && parameters && parameters.account && parameters.amount) {
+        const params = getParametersFromContext(queryResult,"awating_name");
+        if (params && params.name && parameters && parameters.account && parameters.amount) {
+            const username = params.name;
             const db = getConnection();
             const amount = parseInt(parameters.amount);
             const user = db.get('users').find({name: username}).value();
             const userDest = db.get('users').find({account_number: parameters.account}).value();
+            const  builder = new responseBuilder("session")
             if (user.balance < parseInt(parameters.amount)) {
-                return {
-                    fulfillmentMessages: [
-                        {
-                            text: {
-                                text: [
-                                    `Su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`
-                                ]
-                            }
-                        },
-                        {
-                            payload: {
-                                richContent: [
-                                    [
-                                        {
-                                            type: "chips",
-                                            options: [
-                                                {
-                                                    text: "Cual es mi saldo?"
-                                                },
-                                                {
-                                                    text: "Realizar trasferencia "
-                                                },
-                                                {
-                                                    text: "Indicadores económicos"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                ]
-
-                            }
-                        }
-                    ], source: 'session'
-                }
+                builder.addText(`Estimado ${user.name}, su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`)
+                builder.addChips([
+                    {
+                        text: "Cual es mi saldo?"
+                    },
+                    {
+                        text: "Realizar trasferencia "
+                    },
+                    {
+                        text: "Indicadores económicos"
+                    }
+                ])
+                return builder.getResponse();
             }
             if (userDest) {
                 db.get('users')
@@ -237,50 +174,31 @@ const actions = {
             }
             db.get('transfer').push(transfer).write();
             pdfGenerator(proofName, transferTemplate(parameters.account, formatter.format(amount)))
-            return {
-                fulfillmentMessages: [
-                    {
-                        text: {
-                            text: [
-                                `Estimado ${user.name} se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}` +
-                                ` por el monto de ${formatter.format(amount)}`,
-                                "En que mas te puedo ayudar ?"
-                            ]
-                        }
-                    },
-                    {
-                        payload: {
-                            richContent: [
-                                [
-                                    {
-                                        type: "info",
-                                        title: "Comprobante",
-                                        subtitle: "comprobante de transferencia ",
-                                        image: {
-                                            src: {
-                                                rawUrl: `${url}/images/pdf-icon.png`
-                                            }
-                                        },
-                                        actionLink: `${url}/api/proof/?doc=${proofName}`
-                                    },
-                                    {
-                                        type: "chips",
-                                        options: [
-                                            {
-                                                text: "Indicadores económicos"
-                                            },
-                                            {
-                                                text: "Cual es mi saldo?"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            ]
-
-                        }
+            builder.addText([
+                `Estimado ${user.name} se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}` +
+                ` por el monto de ${formatter.format(amount)}`,
+                "En que mas te puedo ayudar ?"
+            ])
+            builder.addRawRichContent({
+                type: "info",
+                title: "Comprobante",
+                subtitle: "comprobante de transferencia ",
+                image: {
+                    src: {
+                        rawUrl: `${url}/images/pdf-icon.png`
                     }
-                ], source: 'session'
-            }
+                },
+                actionLink: `${url}/api/proof/?doc=${proofName}`
+            })
+            builder.addChips([
+                {
+                    text: "Indicadores económicos"
+                },
+                {
+                    text: "Cual es mi saldo?"
+                }
+            ])
+            return builder.getResponse()
 
         }
     }

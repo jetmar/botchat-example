@@ -17,17 +17,24 @@ const formatter = new Intl.NumberFormat('en-US', {
 })
 
 const pdfGenerator = (name,content)=>{
-    pdf.create(content).toFile('./documents/'+name, function(err, res) {
+    pdf.create(content).toFile('./documents/'+name, (err, res) => {
         if (err){
             console.log(err);
-        } else {
-            console.log(res);
         }
     });
 }
+function getParametersFromContext(queryResult, contextName){
+    const context = queryResult.outputContexts.find(x => x.name.includes(contextName));
+    if(context){
+        return context.parameters;
+    }
+    return null;
+}
+
 module.exports = {
     random,
     generateCardNumber,
     formatter,
-    pdfGenerator
+    pdfGenerator,
+    getParametersFromContext
 }
