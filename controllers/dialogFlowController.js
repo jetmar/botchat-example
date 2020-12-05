@@ -31,9 +31,9 @@ const actions = {
             {
                 text: "Indicadores económicos"
             },
-            {
+/*            {
                 text: "historial de transferencias"
-            }
+            }*/
         ])
         return builder.getResponse();
     },
@@ -56,9 +56,9 @@ const actions = {
             {
                 text: "Realizar trasferencia "
             },
-            {
+/*            {
                 text: "historial de transferencias"
-            }
+            }*/
         ]);
         return builder.getResponse()
     },
@@ -95,9 +95,9 @@ const actions = {
                     {
                         text: "Realizar trasferencia "
                     },
-                    {
+/*                    {
                         text: "historial de transferencias"
-                    }
+                    }*/
                 ])
             } else
                 builder.addChips([
@@ -138,9 +138,9 @@ const actions = {
                     {
                         text: "Indicadores económicos"
                     },
-                    {
+/*                    {
                         text: "historial de transferencias"
-                    }
+                    }*/
                 ])
                 return builder.getResponse();
             }
@@ -189,9 +189,9 @@ const actions = {
                 {
                     text: "Cual es mi saldo?"
                 },
-                {
+/*                {
                     text: "historial de transferencias"
-                }
+                }*/
             ])
             return builder.getResponse()
 
