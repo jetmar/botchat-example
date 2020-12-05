@@ -1,5 +1,5 @@
 const {getConnection} = require('../store/db')
-const {generateCardNumber, formatter, pdfGenerator,getParametersFromContext} = require('../utils/')
+const {generateCardNumber, formatter, pdfGenerator, getParametersFromContext} = require('../utils/')
 const transferTemplate = require('../templates/transfer')
 const responseBuilder = require('../utils/responseBuilder')
 const {v4} = require('uuid')
@@ -20,7 +20,7 @@ const actions = {
             db.get('users').push(user).write();
         }
         const builder = new responseBuilder("session");
-        builder.addText( `En que puedo ayudarte ${user.name}?`);
+        builder.addText(`En que puedo ayudarte ${user.name}?`);
         builder.addChips([
             {
                 text: "Cual es mi saldo?"
@@ -38,13 +38,13 @@ const actions = {
         return builder.getResponse();
     },
     BALANCE: ({queryResult}) => {
-        const params = getParametersFromContext(queryResult,"awating_name");
-        if(!params || !params.name){
+        const params = getParametersFromContext(queryResult, "awating_name");
+        if (!params || !params.name) {
             return {
                 fulfillmentText: `No es posible procesar su consulta en este momento `, source: 'session'
             }
         }
-        const username =params.name;
+        const username = params.name;
         const db = getConnection();
         const user = db.get('users').find({name: username}).value()
         const builder = new responseBuilder('session');
@@ -60,7 +60,7 @@ const actions = {
                 text: "historial de transferencias"
             }
         ]);
-        return  builder.getResponse()
+        return builder.getResponse()
     },
     INDICATORS: async ({queryResult}) => {
         try {
@@ -86,7 +86,7 @@ const actions = {
                 text: data
             })
             builder.addText("");
-            const params = getParametersFromContext(queryResult,"awating_name");
+            const params = getParametersFromContext(queryResult, "awating_name");
             if (params && params.name) {
                 builder.addChips([
                     {
@@ -100,7 +100,7 @@ const actions = {
                     }
                 ])
             } else
-                builder.addChips( [
+                builder.addChips([
                     {
                         text: "Quiero iniciar sesion"
                     },
@@ -118,14 +118,14 @@ const actions = {
     },
     TRANSFER: ({queryResult}, url) => {
         const {parameters} = queryResult;
-        const params = getParametersFromContext(queryResult,"awating_name");
+        const params = getParametersFromContext(queryResult, "awating_name");
         if (params && params.name && parameters && parameters.account && parameters.amount) {
             const username = params.name;
             const db = getConnection();
             const amount = parseInt(parameters.amount);
             const user = db.get('users').find({name: username}).value();
             const userDest = db.get('users').find({account_number: parameters.account}).value();
-            const  builder = new responseBuilder("session")
+            const builder = new responseBuilder("session")
             if (user.balance < parseInt(parameters.amount)) {
                 builder.addText(`Estimado ${user.name}, su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`)
                 builder.addChips([
@@ -197,20 +197,25 @@ const actions = {
 
         }
     },
-    TRANSFER_HISTORY:({queryResult}) => {
-        const params = getParametersFromContext(queryResult,"awating_name");
-        if(params && params.name){
+    TRANSFER_HISTORY: ({queryResult}) => {
+        const params = getParametersFromContext(queryResult, "awating_name");
+        if (params && params.name) {
             const db = getConnection();
             const user = db.get('users').find({name: params.name}).value();
-            const transfers = db.get('transfer').filter({user_id:user.id}).value();
+            const transfers = db.get('transfer').filter({user_id: user.id}).value();
             const builder = new responseBuilder("session");
-            builder.addText("")
 
-            builder.addRawRichContent({
-                type: "description",
-                title: "Historial de todas las transferencias realizadas hasta hoy",
-                text: transfers.map( t => `cuenta de destino: ${t.target_account} , monto transferido: ${t.amount}, fecha transacción: ${new Date(t.date).toLocaleString()}`)
-            })
+            if (transfers > 0) {
+                builder.addText("")
+                builder.addRawRichContent({
+                    type: "description",
+                    title: "Historial de todas las transferencias realizadas hasta hoy",
+                    text: transfers.map(t => `cuenta de destino: ${t.target_account} , monto transferido: ${t.amount}, fecha transacción: ${new Date(t.date).toLocaleString()}`)
+                })
+            } else{
+                builder.addText(`Estimado ${user.name} hasta el día de hoy no se a registrado ninguna transferencia  `)
+            }
+
             return builder.getResponse();
         }
         return {
