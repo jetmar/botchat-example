@@ -58,6 +58,11 @@ const actions = {
             return {
                 fulfillmentMessages: [
                     {
+                        text: {
+                            text: []
+                        }
+                    },
+                    {
                         payload:{
                             richContent: [
                                 [
