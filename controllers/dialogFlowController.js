@@ -15,7 +15,16 @@ const actions = {
             }
             db.get('users').push(user).write();
         }
-        return {fulfillmentText: 'hola que tal el dia ' + user.name + '?', source: 'session'}
+        return {
+            fulfillmentMessages: [
+                {
+                    text: {
+                        text: [
+                            `En que puedo ayudarte ${user.name}?`
+                        ]
+                    }
+                }], source: 'session'
+        }
     },
     BALANCE: ({queryResult}) => {
         const username = queryResult.outputContexts[0].parameters.name;
@@ -23,7 +32,7 @@ const actions = {
         const db = getConnection();
         const user = db.get('users').find({name: username}).value()
         return {
-            fulfillmentText:`${user.name}! tu saldo actual es de ${user.balance}`, source: 'session'
+            fulfillmentText: `${user.name}! tu saldo actual es de ${user.balance}`, source: 'session'
         }
     }
 }
