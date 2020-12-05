@@ -1,5 +1,5 @@
 const {getConnection} = require('../store/db')
-const {generateCardNumber, formatter,pdfGenerator} = require('../utils/')
+const {generateCardNumber, formatter, pdfGenerator} = require('../utils/')
 const transferTemplate = require('../templates/transfer')
 const {v4} = require('uuid')
 const axios = require('axios');
@@ -65,11 +65,11 @@ const actions = {
                         }
                     },
                     {
-                        payload:{
+                        payload: {
                             richContent: [
                                 [
                                     {
-                                        type: "Indicadores economicos",
+                                        type: "description",
                                         title: "Valoración en CLP",
                                         text: data
                                     }
@@ -87,12 +87,12 @@ const actions = {
             }
         }
     },
-    TRANSFER: ({queryResult},url) => {
+    TRANSFER: ({queryResult}, url) => {
         const {parameters} = queryResult;
         const username = queryResult.outputContexts[0].parameters.name;
         if (username && parameters && parameters.account && parameters.amount) {
             const db = getConnection();
-            const amount =  parseInt(parameters.amount);
+            const amount = parseInt(parameters.amount);
             const user = db.get('users').find({name: username}).value();
             const userDest = db.get('users').find({account_number: parameters.account}).value();
             if (user.balance < parseInt(parameters.amount)) {
@@ -116,19 +116,19 @@ const actions = {
                 id: v4(),
                 amount: amount,
                 date: new Date(),
-                user_id:user.id,
+                user_id: user.id,
                 target_account: parameters.account,
                 origin_account: user.account_number,
-                transfer_proof:proofName
+                transfer_proof: proofName
             }
             db.get('transfer').push(transfer).write();
-            pdfGenerator(proofName,transferTemplate(parameters.account,formatter.format(amount)))
+            pdfGenerator(proofName, transferTemplate(parameters.account, formatter.format(amount)))
             return {
                 fulfillmentMessages: [
                     {
                         text: {
                             text: [
-                                `Estimado ${user.name} Se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}`+
+                                `Estimado ${user.name} Se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}` +
                                 ` por el monto de ${formatter.format(amount)}`,
                                 "En que mas te puedo ayudar ?"
                             ]
