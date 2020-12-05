@@ -39,12 +39,21 @@ const actions = {
     },
     INDICATORS:async ({queryResult}) =>{
         try {
-            const resp = await axios.get("https://mindicador.cl/api");
             const data = ['valor en CLP']
-            for (const key in resp.data){
-                if(key === "dolar" || key === "utm" || key === "uf" ){
-                    const ind =resp.data[key];
-                    data.push(`${ind.nombre}: $${ind.valor}`)
+            const {parameters} = queryResult;
+            if(parameters && parameters.any){
+                const date = new Date();
+                const resp = await axios.get(`https://mindicador.cl/api/${parameters.any}/${date.getDay()}-${date.getMonth()+1}-${date.getFullYear()}`);
+                data.push(`${resp.data.nombre}: $${resp.data.serie[0].valor}`);
+            }
+            else {
+                const resp = await axios.get("https://mindicador.cl/api");
+
+                for (const key in resp.data) {
+                    if (key === "dolar" || key === "utm" || key === "uf") {
+                        const ind = resp.data[key];
+                        data.push(`${ind.nombre}: $${ind.valor}`)
+                    }
                 }
             }
             return {
