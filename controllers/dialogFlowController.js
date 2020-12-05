@@ -115,12 +115,13 @@ const actions = {
                     text: data
                 }
             ];
-            if(
+            if (
                 queryResult.outputContexts
                 &&
-                queryResult.outputContexts[0].parameters &&
+                queryResult.outputContexts[0].parameters
+                &&
                 queryResult.outputContexts[0].parameters.name
-            ){
+            ) {
                 content.push({
                     type: "chips",
                     options: [
@@ -132,7 +133,7 @@ const actions = {
                         }
                     ]
                 });
-            }else
+            } else
                 content.push({
                     type: "chips",
                     options: [
@@ -180,8 +181,38 @@ const actions = {
             const userDest = db.get('users').find({account_number: parameters.account}).value();
             if (user.balance < parseInt(parameters.amount)) {
                 return {
-                    fulfillmentText: `Su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`,
-                    source: 'session'
+                    fulfillmentMessages: [
+                        {
+                            text: {
+                                text: [
+                                    `Su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`
+                                ]
+                            }
+                        },
+                        {
+                            payload: {
+                                richContent: [
+                                    [
+                                        {
+                                            type: "chips",
+                                            options: [
+                                                {
+                                                    text: "Cual es mi saldo?"
+                                                },
+                                                {
+                                                    text: "Realizar trasferencia "
+                                                },
+                                                {
+                                                    text: "Indicadores económicos"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ]
+
+                            }
+                        }
+                    ], source: 'session'
                 }
             }
             if (userDest) {
@@ -211,7 +242,7 @@ const actions = {
                     {
                         text: {
                             text: [
-                                `Estimado ${user.name} Se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}` +
+                                `Estimado ${user.name} se realizo con éxito la transferencia a la cuenta bancaria n°${parameters.account}` +
                                 ` por el monto de ${formatter.format(amount)}`,
                                 "En que mas te puedo ayudar ?"
                             ]
