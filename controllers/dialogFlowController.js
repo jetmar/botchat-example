@@ -212,10 +212,20 @@ const actions = {
                     title: "Historial de todas las transferencias realizadas hasta hoy",
                     text: transfers.map(t => `cuenta de destino: ${t.target_account} , monto transferido: ${t.amount}, fecha transacción: ${new Date(t.date).toLocaleString()}`)
                 })
-            } else{
+            } else {
                 builder.addText(`Estimado ${user.name} hasta el día de hoy no se a registrado ninguna transferencia  `)
             }
-
+            builder.addChips([
+                {
+                    text: "Indicadores económicos"
+                },
+                {
+                    text: "Cual es mi saldo?"
+                },
+                {
+                    text: "Realizar trasferencia "
+                }
+            ])
             return builder.getResponse();
         }
         return {
