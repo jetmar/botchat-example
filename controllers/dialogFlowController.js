@@ -19,40 +19,23 @@ const actions = {
             }
             db.get('users').push(user).write();
         }
-        return {
-            fulfillmentMessages: [
-                {
-                    text: {
-                        text: [
-                            `En que puedo ayudarte ${user.name}?`
-                        ]
-                    }
-                },
-                {
-                    payload: {
-                        richContent: [
-                            [
-                                {
-                                    type: "chips",
-                                    options: [
-                                        {
-                                            text: "Cual es mi saldo?"
-                                        },
-                                        {
-                                            text: "Realizar trasferencia "
-                                        },
-                                        {
-                                            text: "Indicadores económicos"
-                                        }
-                                    ]
-                                }
-                            ]
-                        ]
-
-                    }
-                }
-            ], source: 'session'
-        }
+        const builder = new responseBuilder("session");
+        builder.addText( `En que puedo ayudarte ${user.name}?`);
+        builder.addChips([
+            {
+                text: "Cual es mi saldo?"
+            },
+            {
+                text: "Realizar trasferencia "
+            },
+            {
+                text: "Indicadores económicos"
+            },
+            {
+                text: "historial de transferencias"
+            }
+        ])
+        return builder.getResponse();
     },
     BALANCE: ({queryResult}) => {
         const params = getParametersFromContext(queryResult,"awating_name");
@@ -72,6 +55,9 @@ const actions = {
             },
             {
                 text: "Realizar trasferencia "
+            },
+            {
+                text: "historial de transferencias"
             }
         ]);
         return  builder.getResponse()
@@ -108,6 +94,9 @@ const actions = {
                     },
                     {
                         text: "Realizar trasferencia "
+                    },
+                    {
+                        text: "historial de transferencias"
                     }
                 ])
             } else
@@ -148,6 +137,9 @@ const actions = {
                     },
                     {
                         text: "Indicadores económicos"
+                    },
+                    {
+                        text: "historial de transferencias"
                     }
                 ])
                 return builder.getResponse();
@@ -196,10 +188,33 @@ const actions = {
                 },
                 {
                     text: "Cual es mi saldo?"
+                },
+                {
+                    text: "historial de transferencias"
                 }
             ])
             return builder.getResponse()
 
+        }
+    },
+    TRANSFER_HISTORY:({queryResult}) => {
+        const params = getParametersFromContext(queryResult,"awating_name");
+        if(params && params.name){
+            const db = getConnection();
+            const user = db.get('users').find({name: params.name}).value();
+            const transfers = db.get('transfer').filter({user_id:user.id}).value();
+            const builder = new responseBuilder("session");
+            builder.addText("")
+
+            builder.addRawRichContent({
+                type: "description",
+                title: "Historial de todas las transferencias realizadas hasta hoy",
+                text: transfers.map( t => `cuenta de destino: ${t.target_account} , monto transferido: ${t.amount}, fecha transacción: ${new Date(t.date).toLocaleString()}`)
+            })
+            return builder.getResponse();
+        }
+        return {
+            fulfillmentText: `Creo que no entendí `, source: 'sesion'
         }
     }
 }
