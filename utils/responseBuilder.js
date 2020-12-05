@@ -30,7 +30,6 @@ class ResponseBuilder {
             const previous = this.response.fulfillmentMessages.findIndex(x => x.payload);
             console.log(previous)
             if(previous >= 0){
-                console.log("previo");
                 const previousChips = this.response.fulfillmentMessages[previous].payload.richContent[0].findIndex(x => x.type === "chips");
                 if(previousChips >= 0){
                     this.response.fulfillmentMessages[previous].payload.richContent[0][previousChips].options.push(chips)
