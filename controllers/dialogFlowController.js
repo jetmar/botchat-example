@@ -1,6 +1,7 @@
 const {getConnection} = require('../store/db')
 const {generateCardNumber,formatter} = require('../utils/')
 const {v4} = require('uuid')
+const axios = require('axios');
 const actions = {
     AUTH: (context) => {
         const db = getConnection();
@@ -34,6 +35,31 @@ const actions = {
         const user = db.get('users').find({name: username}).value()
         return {
             fulfillmentText: `${user.name}! tu saldo actual es de ${formatter.format(user.balance) }`, source: 'session'
+        }
+    },
+    INDICATORS:async ({queryResult}) =>{
+        try {
+            const resp = await axios.get("https://mindicador.cl/api");
+            const data = ['valor en CLP']
+            for (const key in resp.data){
+                if(key === "dolar" || key === "utm" || key === "uf" ){
+                    const ind =resp.data[key];
+                    data.push(`${ind.nombre}: $${ind.valor}`)
+                }
+            }
+            return {
+                fulfillmentMessages: [
+                    {
+                        text: {
+                            text: data
+                        }
+                    }], source: 'session'
+            };
+
+        }catch (e) {
+            return {
+                fulfillmentText: `los datos economicos no estan disponibles en este momento`, source: 'session'
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/dialogFlowController')
-router.post('/', function (req, res, next) {
+router.post('/', async function (req, res, next) {
     //console.log(req.body.queryResult.parameters.name);
     const action = req.body.queryResult.action;
     if(action){
         try {
-            const  result = controller[action](req.body);
+            const result = await controller[action](req.body);
             res.json(result)
         }
         catch (e) {
