@@ -42,8 +42,7 @@ const actions = {
             const data = ['valor en CLP']
             const {parameters} = queryResult;
             if(parameters && parameters.any){
-                const date = new Date();
-                const resp = await axios.get(`https://mindicador.cl/api/${parameters.any}/${date.getDay()}-${date.getMonth()+1}-${date.getFullYear()}`);
+                const resp = await axios.get(`https://mindicador.cl/api/${parameters.any}`);
                 data.push(`${resp.data.nombre}: $${resp.data.serie[0].valor}`);
             }
             else {
@@ -66,6 +65,7 @@ const actions = {
             };
 
         }catch (e) {
+            console.log(e);
             return {
                 fulfillmentText: `los datos economicos no estan disponibles en este momento`, source: 'session'
             }
