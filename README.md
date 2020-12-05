@@ -17,3 +17,9 @@
  - puede consultar el saldo
  - realizar trasferencias
  - consultar indicadores económicos(uf,utm, dolar), de forma independiente o general   
+ 
+
+> Ejemplo de uso
+
+![indicador economico dolar](https://raw.githubusercontent.com/jetmar/botchat-example/master/public/images/example.png)
+
