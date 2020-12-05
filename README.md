@@ -1,4 +1,4 @@
-# botchat bancario
+# chatbot bancario
 **guiá de instalación** 
 
 > Pasos de instalacion de chatbot 
