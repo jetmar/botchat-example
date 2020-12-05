@@ -5,8 +5,18 @@
       "name": "Jerson",
       "phone": " +56972636554",
       "account_number": "6125272641",
-      "balance": 5000000
+      "balance": 4950000
     }
   ],
-  "transfer": []
+  "transfer": [
+    {
+      "id": "ded15fec-f0c7-44ab-8a46-32d626d9dc0a",
+      "amount": 50000,
+      "date": "2020-12-05T18:09:49.650Z",
+      "user_id": "1935862d-1e86-4d11-a0ab-13f3542e1fc7",
+      "target_account": "2654545254",
+      "origin_account": "6125272641",
+      "transfer_proof": "9288632b-2481-418a-bfbe-320eb2fbe06e.pdf"
+    }
+  ]
 }

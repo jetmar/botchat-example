@@ -10,8 +10,9 @@ router.post('/', async (req, res, next) => {
             const result = await controller[action](req.body, url);
             res.json(result)
         } catch (e) {
-            console.log(e);
-            res.json({error: e});
+            res.json({
+                fulfillmentText: `no podemos procesar tu solicitud en estos momentos`, source: 'error'
+            });
         }
     }
 
