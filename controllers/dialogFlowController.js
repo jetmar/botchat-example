@@ -59,7 +59,9 @@ const actions = {
                 fulfillmentMessages: [
                     {
                         text: {
-                            text: []
+                            text: [
+                                ""
+                            ]
                         }
                     },
                     {
