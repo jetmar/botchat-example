@@ -41,8 +41,8 @@ const actions = {
         try {
             const data = ['valor en CLP']
             const {parameters} = queryResult;
-            if(parameters && parameters.any){
-                const resp = await axios.get(`https://mindicador.cl/api/${parameters.any}`);
+            if(parameters && parameters.indicator){
+                const resp = await axios.get(`https://mindicador.cl/api/${parameters.indicator}`);
                 data.push(`${resp.data.nombre}: $${resp.data.serie[0].valor}`);
             }
             else {
