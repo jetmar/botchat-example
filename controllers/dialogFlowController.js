@@ -1,5 +1,6 @@
 const {getConnection} = require('../store/db')
-const {generateCardNumber, formatter} = require('../utils/')
+const {generateCardNumber, formatter,pdfGenerator} = require('../utils/')
+const transferTemplate = require('../templates/transfer')
 const {v4} = require('uuid')
 const axios = require('axios');
 const actions = {
@@ -69,7 +70,7 @@ const actions = {
             }
         }
     },
-    TRANSFER: ({queryResult}) => {
+    TRANSFER: ({queryResult},url) => {
         const {parameters} = queryResult;
         const username = queryResult.outputContexts[0].parameters.name;
         if (username && parameters && parameters.account && parameters.amount) {
@@ -79,7 +80,7 @@ const actions = {
             const userDest = db.get('users').find({account_number: parameters.account}).value();
             if (user.balance < parseInt(parameters.amount)) {
                 return {
-                    fulfillmentText: `Su cuenta bancario no cuenta con el saldo suficiente para realizar esta operación`,
+                    fulfillmentText: `Su cuenta bancaria no cuenta con el saldo suficiente para realizar esta operación`,
                     source: 'session'
                 }
             }
@@ -93,15 +94,18 @@ const actions = {
                 .find({id: user.id})
                 .assign({balance: user.balance - amount})
                 .write();
+            const proofName = `${v4()}.pdf`;
             const transfer = {
                 id: v4(),
                 amount: amount,
                 date: new Date(),
                 user_id:user.id,
                 target_account: parameters.account,
-                origin_account: user.account_number
+                origin_account: user.account_number,
+                transfer_proof:proofName
             }
             db.get('transfer').push(transfer).write();
+            pdfGenerator(proofName,transferTemplate(parameters.account,formatter.format(amount)))
             return {
                 fulfillmentMessages: [
                     {
@@ -112,7 +116,28 @@ const actions = {
                                 "En que mas te puedo ayudar ?"
                             ]
                         }
-                    }], source: 'session'
+                    },
+                    {
+                        payload: {
+                            richContent: [
+                                [
+                                    {
+                                        type: "info",
+                                        title: "Comprobante",
+                                        subtitle: "comprobante de transferencia ",
+                                        image: {
+                                            src: {
+                                                rawUrl: `${url}/images/pdf-icon.png`
+                                            }
+                                        },
+                                        actionLink: `${url}/api/proof/?doc=${proofName}`
+                                    }
+                                ]
+                            ]
+
+                        }
+                    }
+                ], source: 'session'
             }
 
         }

@@ -1,3 +1,4 @@
+const pdf = require('html-pdf');
 function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -14,8 +15,19 @@ const formatter = new Intl.NumberFormat('en-US', {
     currency: 'USD',
     minimumFractionDigits: 0
 })
+
+const pdfGenerator = (name,content)=>{
+    pdf.create(content).toFile('./documents/'+name, function(err, res) {
+        if (err){
+            console.log(err);
+        } else {
+            console.log(res);
+        }
+    });
+}
 module.exports = {
     random,
     generateCardNumber,
-    formatter
+    formatter,
+    pdfGenerator
 }
