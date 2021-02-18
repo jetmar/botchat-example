@@ -24,7 +24,7 @@ router.get('/proof', (req, res) => {
     res.download(directoryPath + "/" + doc, doc, (err) => {
         if (err) {
             res.status(500).send({
-                message: "no se puede descargar en archivo " + err,
+                message: "no se puede descargar en archivo actualmente" + err,
             });
         }
     });
