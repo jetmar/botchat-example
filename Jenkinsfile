@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'npm run start'
+                sh './deploy.sh'
             }
         }
     }
