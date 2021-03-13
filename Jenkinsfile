@@ -17,6 +17,11 @@ pipeline {
                 echo 'Testing.. example'
             }
         }
+        stage('PrepareDeploy'){
+            steps {
+                sh 'chmod +x ./deploy.sh'
+            }
+        }
         stage('Deploy') {
             steps {
                 sh './deploy.sh pid.txt'
