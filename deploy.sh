@@ -13,7 +13,6 @@ if [ -e $1 ]; then
   rm $1	
 fi
 nohup node ./bin/www &
-PID="123"
 PID=$!
 echo $PID > $1
 exit
