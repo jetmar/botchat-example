@@ -12,7 +12,9 @@ if [ -e $1 ]; then
   sleep 3
   rm $1	
 fi
+PID="123"
 nohup node ./bin/www &
 PID=$!
+echo "aplicacion node desplegada $PID"
 echo $PID > $1
 exit
