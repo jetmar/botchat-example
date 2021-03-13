@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-            echo 'deploy ....'
+            echo 'deploying  ....'
                 withEnv(['JENKINS_NODE_COOKIE=dontkillme']) {
                   sh './deploy.sh pid.txt'
                 }
