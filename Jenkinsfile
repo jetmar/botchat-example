@@ -1,6 +1,7 @@
 pipeline {
     agent any
     tools {nodejs "nodeJS"}
+    JENKINS_NODE_COOKIE=dontKillMe
     stages {
         stage('checkout-git'){
             steps{
@@ -23,8 +24,8 @@ pipeline {
             }
         }
         stage('Deploy') {
-            steps {
-                sh './deploy.sh pid.txt'
+            withEnv(['JENKINS_NODE_COOKIE=dontkillme']) {
+                  sh './deploy.sh pid.txt'
             }
         }
     }

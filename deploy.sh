@@ -13,7 +13,7 @@ if [ -e $1 ]; then
   rm $1	
 fi
 PID="123"
-node ./bin/www &
+nohup node ./bin/www &
 PID=$!
 echo "aplicacion node desplegada $PID"
 echo $PID > $1
